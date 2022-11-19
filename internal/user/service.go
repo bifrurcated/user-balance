@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"fmt"
 	"github.com/bifrurcated/user-balance/pkg/logging"
 )
 
@@ -18,7 +17,7 @@ func NewService(repository Repository, logger *logging.Logger) *Service {
 func (s *Service) GetOne(ctx context.Context, id int64) (user User, err error) {
 	user, err = s.repository.FindOne(ctx, id)
 	if err != nil {
-		return user, fmt.Errorf("failed to get user due to error: %v", err)
+		return user, err
 	}
 	return user, nil
 }

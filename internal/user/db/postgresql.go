@@ -2,10 +2,13 @@ package db
 
 import (
 	"context"
+	"errors"
+	"github.com/bifrurcated/user-balance/internal/apperror"
 	"github.com/bifrurcated/user-balance/internal/user"
 	"github.com/bifrurcated/user-balance/pkg/client/postgresql"
 	"github.com/bifrurcated/user-balance/pkg/logging"
 	repeatable "github.com/bifrurcated/user-balance/pkg/utils"
+	"github.com/jackc/pgx/v5"
 )
 
 type repository struct {
@@ -14,8 +17,7 @@ type repository struct {
 }
 
 func (r *repository) Create(ctx context.Context, user *user.User) error {
-	//TODO implement me
-	panic("implement me")
+	panic("")
 }
 
 func (r *repository) FindOne(ctx context.Context, id int64) (u user.User, err error) {
@@ -23,8 +25,11 @@ func (r *repository) FindOne(ctx context.Context, id int64) (u user.User, err er
 		SELECT id, name, amount FROM usr WHERE id=$1
 	`
 	r.logger.Tracef("SQL Query: %s", repeatable.FormatQuery(q))
-	err = r.client.QueryRow(ctx, q, id).Scan(&u.ID, &u.Name, u.Amount)
+	err = r.client.QueryRow(ctx, q, id).Scan(&u.ID, &u.Name, &u.Amount)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return u, apperror.ErrNotFound
+		}
 		return u, err
 	}
 

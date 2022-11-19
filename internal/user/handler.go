@@ -9,11 +9,13 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 const (
-	usersURL = "/users"
-	userURL  = "/users/:id"
+	usersURL       = "/users"
+	userURL        = "/users/:id"
+	userBalanceURL = "/users/:id/balance"
 )
 
 type handler struct {
@@ -26,7 +28,7 @@ func NewHandler(service *Service, logger *logging.Logger) handlers.Handler {
 }
 
 func (h *handler) Register(router *httprouter.Router) {
-	router.HandlerFunc(http.MethodGet, usersURL, apperror.Middleware(h.GetBalance))
+	router.HandlerFunc(http.MethodGet, userBalanceURL, apperror.Middleware(h.GetBalance))
 	router.HandlerFunc(http.MethodPost, userURL, apperror.Middleware(h.AddMoney))
 }
 
@@ -36,20 +38,17 @@ func (h *handler) AddMoney(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h *handler) GetBalance(w http.ResponseWriter, r *http.Request) error {
-	fmt.Println(r.FormValue("id"))
-	strID := r.FormValue("id")
-	if strID == "" {
-		return fmt.Errorf("id param is empty")
-	}
+	split := strings.Split(r.URL.Path, "/")
+	strID := split[2]
 	id, err := strconv.ParseInt(strID, 10, 64)
 	if err != nil {
-		return fmt.Errorf("cannot parse %s to int64", strID)
+		return apperror.NewAppError(nil, fmt.Sprintf("cannot parse %s to int64", strID), "", "US-000004")
 	}
 	one, err := h.service.GetOne(r.Context(), id)
 	if err != nil {
 		return err
 	}
-	bytes, err := json.Marshal(one)
+	bytes, err := json.Marshal(one.Amount)
 	if err != nil {
 		return err
 	}
