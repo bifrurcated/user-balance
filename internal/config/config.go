@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/bifrurcated/user-balance/pkg/logging"
 	"github.com/ilyakaznacheev/cleanenv"
+	"os"
 	"sync"
 )
 
@@ -36,6 +37,10 @@ func GetConfig() *Config {
 			help, _ := cleanenv.GetDescription(instance, nil)
 			logger.Info(help)
 			logger.Fatal(err)
+		}
+		host := os.Getenv("DB_HOST")
+		if host != "" {
+			instance.Storage.Host = host
 		}
 	})
 	return instance

@@ -1,0 +1,26 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:14.2-alpine
+    container_name: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data/pgdata
+    environment:
+      POSTGRES_DB: user-balance
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    restart: always
+  app:
+    image: bifurcated/user-balance:v1
+    container_name: application
+    ports:
+      - 1234:1234
+    environment:
+      DB_HOST: db
+    restart: always
+    links:
+      - db
+

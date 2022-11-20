@@ -1,0 +1,9 @@
+build/
+logs/
+test-api.http
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
