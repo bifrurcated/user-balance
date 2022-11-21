@@ -13,6 +13,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -28,6 +30,11 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	err = executeSQLScript(context.TODO(), client)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
 	balanceRepository := balancedb.NewRepository(client, logger)
 	balanceService := balance.NewService(balanceRepository, logger)
 	balanceHandler := balance.NewHandler(balanceService, logger)
@@ -39,6 +46,25 @@ func main() {
 	reserveHandler.Register(router)
 
 	start(router, cfg)
+}
+
+func executeSQLScript(ctx context.Context, client postgresql.Client) error {
+	logger := logging.GetLogger()
+	path := filepath.Join("data.sql")
+
+	logger.Info("read sql script file")
+	c, ioErr := os.ReadFile(path)
+	if ioErr != nil {
+		return ioErr
+	}
+	sql := string(c)
+	logger.Info("execute sql script")
+	res, err := client.Exec(ctx, sql)
+	if err != nil {
+		return err
+	}
+	logger.Debug(res)
+	return nil
 }
 
 func start(router *httprouter.Router, cfg *config.Config) {

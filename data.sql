@@ -1,13 +1,13 @@
-DROP TABLE IF EXISTS balance CASCADE;
-DROP TABLE IF EXISTS reserve CASCADE;
+-- DROP TABLE IF EXISTS balance CASCADE;
+-- DROP TABLE IF EXISTS reserve CASCADE;
 
-CREATE TABLE balance
+CREATE TABLE IF NOT EXISTS balance
 (
     id      BIGSERIAL PRIMARY KEY,
     user_id BIGINT                   NOT NULL,
     amount  DECIMAL(13, 4) DEFAULT 0 NOT NULL
 );
-CREATE TABLE reserve
+CREATE TABLE IF NOT EXISTS reserve
 (
     id         BIGSERIAL PRIMARY KEY,
     user_id    BIGINT         NOT NULL,
