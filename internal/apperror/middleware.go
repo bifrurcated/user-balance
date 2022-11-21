@@ -2,6 +2,7 @@ package apperror
 
 import (
 	"errors"
+	"github.com/bifrurcated/user-balance/pkg/logging"
 	"net/http"
 )
 
@@ -16,17 +17,26 @@ func Middleware(h appHandler) http.HandlerFunc {
 			if errors.As(err, &appErr) {
 				if errors.Is(err, ErrNotFound) {
 					w.WriteHeader(http.StatusNotFound)
-					w.Write(ErrNotFound.Marshal())
+					_, err = w.Write(ErrNotFound.Marshal())
+					if err != nil {
+						logging.GetLogger().Error(err)
+					}
 					return
 				}
 
 				err = err.(*AppError)
 				w.WriteHeader(http.StatusBadRequest)
-				w.Write(appErr.Marshal())
+				_, err = w.Write(appErr.Marshal())
+				if err != nil {
+					logging.GetLogger().Error(err)
+				}
 				return
 			}
 			w.WriteHeader(http.StatusTeapot)
-			w.Write(systemError(err).Marshal())
+			_, err = w.Write(systemError(err).Marshal())
+			if err != nil {
+				logging.GetLogger().Error(err)
+			}
 		}
 	}
 }

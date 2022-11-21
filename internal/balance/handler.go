@@ -66,6 +66,9 @@ func (h *handler) GetBalance(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write(bytes)
+	_, err = w.Write(bytes)
+	if err != nil {
+		return err
+	}
 	return nil
 }
