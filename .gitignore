@@ -1,4 +1,11 @@
-build
-.idea
-logs
+build/
+logs/
+pg_data/
+
 test-api.http
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr

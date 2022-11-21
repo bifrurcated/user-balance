@@ -41,6 +41,7 @@ func GetConfig() *Config {
 		host := os.Getenv("DB_HOST")
 		if host != "" {
 			instance.Storage.Host = host
+			logger.Infof("host: %s", host)
 		}
 	})
 	return instance
