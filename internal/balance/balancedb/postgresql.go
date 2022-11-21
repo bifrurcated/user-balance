@@ -61,7 +61,7 @@ func (r *repository) FindOne(ctx context.Context, id uint64) (u balance.Balance,
 	return u, nil
 }
 
-func (r *repository) AddAmount(ctx context.Context, tum balance.TransferUserMoney) error {
+func (r *repository) AddAmount(ctx context.Context, tum balance.CreateUserBalanceDTO) error {
 	tx, err := r.client.Begin(ctx)
 	if err != nil {
 		return err
@@ -92,7 +92,7 @@ func (r *repository) AddAmount(ctx context.Context, tum balance.TransferUserMone
 	return nil
 }
 
-func (r *repository) SubtractAmount(ctx context.Context, tum balance.TransferUserMoney) error {
+func (r *repository) SubtractAmount(ctx context.Context, tum balance.CreateUserBalanceDTO) error {
 	tx, err := r.client.Begin(ctx)
 	if err != nil {
 		return err

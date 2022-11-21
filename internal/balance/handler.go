@@ -31,19 +31,19 @@ func (h *handler) Register(router *httprouter.Router) {
 }
 
 func (h *handler) AddMoney(w http.ResponseWriter, r *http.Request) error {
-	var tum TransferUserMoney
-	err := json.NewDecoder(r.Body).Decode(&tum)
+	var dto CreateUserBalanceDTO
+	err := json.NewDecoder(r.Body).Decode(&dto)
 	if err != nil {
 		return apperror.NewAppError(nil, err.Error(), "", "US-000004")
 	}
-	h.logger.Debugf("tum = %v", tum)
-	if tum.Amount < 0 {
+	h.logger.Debugf("dto = %v", dto)
+	if dto.Amount < 0 {
 		return apperror.NewAppError(
 			nil,
-			fmt.Sprintf("cannot add negative amount (%f)", tum.Amount),
+			fmt.Sprintf("cannot add negative amount (%f)", dto.Amount),
 			"", "US-000004")
 	}
-	err = h.service.AddAmount(r.Context(), tum)
+	err = h.service.AddAmount(r.Context(), dto)
 	if err != nil {
 		return err
 	}

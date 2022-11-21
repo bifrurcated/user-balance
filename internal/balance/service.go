@@ -22,8 +22,8 @@ func (s *Service) GetOne(ctx context.Context, id uint64) (user Balance, err erro
 	return user, nil
 }
 
-func (s *Service) AddAmount(ctx context.Context, tum TransferUserMoney) error {
-	err := s.repository.AddAmount(ctx, tum)
+func (s *Service) AddAmount(ctx context.Context, dto CreateUserBalanceDTO) error {
+	err := s.repository.AddAmount(ctx, dto)
 	if err != nil {
 		return err
 	}
