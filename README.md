@@ -27,6 +27,6 @@ Content-Type: application/json
     "user_id": 1,
     "service_id": 3,
     "order_id": 2,
-    "amount": 1500
+    "cost": 1500
 }
 ```

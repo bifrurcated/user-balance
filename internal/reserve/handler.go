@@ -48,3 +48,8 @@ func (h *handler) ReserveMoney(w http.ResponseWriter, r *http.Request) error {
 	}
 	return nil
 }
+
+func (h *handler) ReserveProfit(w http.ResponseWriter, r *http.Request) error {
+
+	return nil
+}

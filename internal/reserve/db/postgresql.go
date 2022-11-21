@@ -23,7 +23,7 @@ func (r *repository) Create(ctx context.Context, reserve *reserve.Reserve) error
 		    ($1,$2,$3,$4)
 		RETURNING id
 	`
-	err := r.client.QueryRow(ctx, q, reserve.UserID, reserve.ServiceID, reserve.OrderID, reserve.Amount).Scan(&reserve.ID)
+	err := r.client.QueryRow(ctx, q, reserve.UserID, reserve.ServiceID, reserve.OrderID, reserve.Cost).Scan(&reserve.ID)
 	if err != nil {
 		var pgError *pgconn.PgError
 		if errors.As(err, &pgError) {

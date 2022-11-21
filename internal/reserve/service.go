@@ -19,7 +19,7 @@ func NewService(reserveRepository Repository, balanceRepository balance.Reposito
 func (s *Service) ReserveMoney(ctx context.Context, dto CreateReserveDTO) (*Reserve, error) {
 	err := s.balanceRepository.SubtractAmount(ctx, balance.CreateUserBalanceDTO{
 		UserID: dto.UserID,
-		Amount: dto.Amount,
+		Amount: dto.Cost,
 	})
 	if err != nil {
 		return nil, err

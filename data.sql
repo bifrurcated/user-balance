@@ -13,7 +13,7 @@ CREATE TABLE reserve
     user_id    BIGINT         NOT NULL,
     service_id BIGINT         NOT NULL,
     order_id   BIGINT         NOT NULL,
-    amount     DECIMAL(13, 4) NOT NULL
+    cost       DECIMAL(13, 4) NOT NULL
 );
 
 -- CREATE TABLE usr

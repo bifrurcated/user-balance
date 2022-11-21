@@ -61,7 +61,7 @@ func (r *repository) FindOne(ctx context.Context, id uint64) (u balance.Balance,
 	return u, nil
 }
 
-func (r *repository) AddAmount(ctx context.Context, tum balance.CreateUserBalanceDTO) error {
+func (r *repository) AddAmount(ctx context.Context, dto balance.CreateUserBalanceDTO) error {
 	tx, err := r.client.Begin(ctx)
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func (r *repository) AddAmount(ctx context.Context, tum balance.CreateUserBalanc
 		WHERE user_id = $1
 	`
 	r.logger.Tracef("SQL Query: %s", repeatable.FormatQuery(q))
-	res, err := r.client.Exec(ctx, q, tum.UserID, tum.Amount)
+	res, err := r.client.Exec(ctx, q, dto.UserID, dto.Amount)
 	if err != nil {
 		return err
 	}
@@ -81,8 +81,8 @@ func (r *repository) AddAmount(ctx context.Context, tum balance.CreateUserBalanc
 	r.logger.Debugf("RowsAffected: %d", res.RowsAffected())
 	if res.RowsAffected() == 0 {
 		err = r.Create(ctx, &balance.Balance{
-			UserID: tum.UserID,
-			Amount: tum.Amount,
+			UserID: dto.UserID,
+			Amount: dto.Amount,
 		})
 		if err != nil {
 			return err
@@ -92,20 +92,20 @@ func (r *repository) AddAmount(ctx context.Context, tum balance.CreateUserBalanc
 	return nil
 }
 
-func (r *repository) SubtractAmount(ctx context.Context, tum balance.CreateUserBalanceDTO) error {
+func (r *repository) SubtractAmount(ctx context.Context, dto balance.CreateUserBalanceDTO) error {
 	tx, err := r.client.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	one, err := r.FindOne(ctx, tum.UserID)
+	one, err := r.FindOne(ctx, dto.UserID)
 	if err != nil {
 		return err
 	}
-	if (one.Amount - tum.Amount) < 0 {
+	if (one.Amount - dto.Amount) < 0 {
 		return apperror.NewAppError(nil,
-			fmt.Sprintf("not enough money (%f) on the user (%d) balance, required amount: %f", one.Amount, tum.UserID, tum.Amount),
+			fmt.Sprintf("not enough money (%f) on the user (%d) balance, required amount: %f", one.Amount, dto.UserID, dto.Amount),
 			"", "US-000005")
 	}
 	q := `
@@ -113,7 +113,7 @@ func (r *repository) SubtractAmount(ctx context.Context, tum balance.CreateUserB
 		SET amount = amount - $2
 		WHERE user_id = $1
 	`
-	res, err := r.client.Exec(ctx, q, tum.UserID, tum.Amount)
+	res, err := r.client.Exec(ctx, q, dto.UserID, dto.Amount)
 	if err != nil {
 		return err
 	}
