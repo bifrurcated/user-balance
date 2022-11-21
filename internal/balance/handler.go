@@ -34,7 +34,7 @@ func (h *handler) AddMoney(w http.ResponseWriter, r *http.Request) error {
 	var tum TransferUserMoney
 	err := json.NewDecoder(r.Body).Decode(&tum)
 	if err != nil {
-		return err
+		return apperror.NewAppError(nil, err.Error(), "", "US-000004")
 	}
 	h.logger.Debugf("tum = %v", tum)
 	if tum.Amount < 0 {
@@ -55,7 +55,7 @@ func (h *handler) GetBalance(w http.ResponseWriter, r *http.Request) error {
 	var ub UserBalance
 	err := json.NewDecoder(r.Body).Decode(&ub)
 	if err != nil {
-		return err
+		return apperror.NewAppError(nil, err.Error(), "", "US-000004")
 	}
 	one, err := h.service.GetOne(r.Context(), ub.UserID)
 	if err != nil {
