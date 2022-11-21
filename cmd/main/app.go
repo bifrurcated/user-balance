@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/bifrurcated/user-balance/internal/balance"
+	"github.com/bifrurcated/user-balance/internal/balance/db"
 	"github.com/bifrurcated/user-balance/internal/config"
-	"github.com/bifrurcated/user-balance/internal/user"
-	"github.com/bifrurcated/user-balance/internal/user/db"
 	"github.com/bifrurcated/user-balance/pkg/client/postgresql"
 	"github.com/bifrurcated/user-balance/pkg/logging"
 	"github.com/julienschmidt/httprouter"
@@ -26,8 +26,8 @@ func main() {
 		logger.Fatal(err)
 	}
 	repository := db.NewRepository(client, logger)
-	service := user.NewService(repository, logger)
-	handler := user.NewHandler(service, logger)
+	service := balance.NewService(repository, logger)
+	handler := balance.NewHandler(service, logger)
 	handler.Register(router)
 
 	start(router, cfg)

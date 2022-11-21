@@ -1,21 +1,18 @@
-package user
+package balance
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/bifrurcated/user-balance/internal/apperror"
 	"github.com/bifrurcated/user-balance/internal/handlers"
 	"github.com/bifrurcated/user-balance/pkg/logging"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
 const (
-	usersURL       = "/users"
-	userURL        = "/users/:id"
-	userBalanceURL = "/users/:id/balance"
+	apiVersionURL = "/api/v1"
+	balanceURL    = "/balance"
+	addMoneyURL   = "/add-money"
 )
 
 type handler struct {
@@ -28,23 +25,33 @@ func NewHandler(service *Service, logger *logging.Logger) handlers.Handler {
 }
 
 func (h *handler) Register(router *httprouter.Router) {
-	router.HandlerFunc(http.MethodGet, userBalanceURL, apperror.Middleware(h.GetBalance))
-	router.HandlerFunc(http.MethodPost, userURL, apperror.Middleware(h.AddMoney))
+	router.HandlerFunc(http.MethodGet, apiVersionURL+balanceURL, apperror.Middleware(h.GetBalance))
+	router.HandlerFunc(http.MethodPost, apiVersionURL+addMoneyURL, apperror.Middleware(h.AddMoney))
 }
 
 func (h *handler) AddMoney(w http.ResponseWriter, r *http.Request) error {
+	var tum TransferUserMoney
+	err := json.NewDecoder(r.Body).Decode(&tum)
+	if err != nil {
+		return err
+	}
+	h.logger.Debugf("tum = %v", tum)
 
+	err = h.service.AddAmount(r.Context(), tum)
+	if err != nil {
+		return err
+	}
+	w.WriteHeader(http.StatusNoContent)
 	return nil
 }
 
 func (h *handler) GetBalance(w http.ResponseWriter, r *http.Request) error {
-	split := strings.Split(r.URL.Path, "/")
-	strID := split[2]
-	id, err := strconv.ParseInt(strID, 10, 64)
+	var ub UserBalance
+	err := json.NewDecoder(r.Body).Decode(&ub)
 	if err != nil {
-		return apperror.NewAppError(nil, fmt.Sprintf("cannot parse %s to int64", strID), "", "US-000004")
+		return err
 	}
-	one, err := h.service.GetOne(r.Context(), id)
+	one, err := h.service.GetOne(r.Context(), ub.UserID)
 	if err != nil {
 		return err
 	}
@@ -52,7 +59,7 @@ func (h *handler) GetBalance(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(bytes)
 	return nil
 }
