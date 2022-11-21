@@ -7,3 +7,12 @@ type Reserve struct {
 	OrderID   uint64  `json:"order_id"`
 	Amount    float32 `json:"amount"`
 }
+
+func NewReserve(dto *CreateReserveDTO) *Reserve {
+	return &Reserve{
+		UserID:    dto.UserID,
+		ServiceID: dto.ServiceID,
+		OrderID:   dto.OrderID,
+		Amount:    dto.Amount,
+	}
+}

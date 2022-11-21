@@ -19,3 +19,14 @@ Content-Type: application/json
   "amount": 100
 }
 ```
+#### Метод резервирования средств с основного баланса на отдельном счете. Принимает id пользователя, ИД услуги, ИД заказа, стоимость.
+```html
+POST http://localhost:1234/api/v1/reserve
+Content-Type: application/json
+{
+    "user_id": 1,
+    "service_id": 3,
+    "order_id": 2,
+    "amount": 1500
+}
+```
