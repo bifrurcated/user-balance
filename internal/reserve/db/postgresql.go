@@ -18,7 +18,7 @@ type repository struct {
 func (r *repository) Create(ctx context.Context, reserve *reserve.Reserve) error {
 	q := `
 		INSERT INTO reserve 
-		    (user_id, service_id, order_id, amount) 
+		    (user_id, service_id, order_id, cost) 
 		VALUES 
 		    ($1,$2,$3,$4)
 		RETURNING id
