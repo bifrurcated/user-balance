@@ -17,7 +17,7 @@ jobs:
       name: Check out code
     
     - name: Docker Build & Push Action
-      uses: mr-smithers-excellent/docker-build-push@v5.6
+      uses: mr-smithers-excellent/docker-build-push@v5.8
       with:
         image: bifurcated/user-balance
         tags: latest
