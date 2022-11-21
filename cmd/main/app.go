@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bifrurcated/user-balance/internal/balance"
-	"github.com/bifrurcated/user-balance/internal/balance/db"
+	"github.com/bifrurcated/user-balance/internal/balance/balancedb"
 	"github.com/bifrurcated/user-balance/internal/config"
 	"github.com/bifrurcated/user-balance/pkg/client/postgresql"
 	"github.com/bifrurcated/user-balance/pkg/logging"
@@ -25,7 +25,7 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
-	repository := db.NewRepository(client, logger)
+	repository := balancedb.NewRepository(client, logger)
 	service := balance.NewService(repository, logger)
 	handler := balance.NewHandler(service, logger)
 	handler.Register(router)
