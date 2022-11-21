@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bifrurcated/user-balance/internal/apperror"
 	"github.com/bifrurcated/user-balance/internal/reserve"
 	"github.com/bifrurcated/user-balance/pkg/client/postgresql"
 	"github.com/bifrurcated/user-balance/pkg/logging"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -44,6 +46,23 @@ func (r *repository) Create(ctx context.Context, reserve *reserve.Reserve) error
 func (r *repository) FindOne(ctx context.Context, id uint64) (reserve.Reserve, error) {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (r *repository) Delete(ctx context.Context, reserve *reserve.Reserve) error {
+	q := `
+		DELETE FROM reserve
+		WHERE user_id = $1 AND service_id = $2 AND order_id = $3
+		RETURNING id, cost
+	`
+	err := r.client.QueryRow(ctx, q, reserve.UserID, reserve.ServiceID, reserve.OrderID).Scan(&reserve.ID, &reserve.Cost)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return apperror.ErrNotFound
+		}
+		return err
+	}
+
+	return nil
 }
 
 func NewRepository(client postgresql.Client, logger *logging.Logger) reserve.Repository {

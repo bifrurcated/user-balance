@@ -16,7 +16,7 @@ func NewService(reserveRepository Repository, balanceRepository balance.Reposito
 	return &Service{reserveRepository: reserveRepository, balanceRepository: balanceRepository, logger: logger}
 }
 
-func (s *Service) ReserveMoney(ctx context.Context, dto CreateReserveDTO) (*Reserve, error) {
+func (s *Service) ReserveMoney(ctx context.Context, dto *CreateReserveDTO) (*Reserve, error) {
 	err := s.balanceRepository.SubtractAmount(ctx, balance.CreateUserBalanceDTO{
 		UserID: dto.UserID,
 		Amount: dto.Cost,
@@ -24,10 +24,19 @@ func (s *Service) ReserveMoney(ctx context.Context, dto CreateReserveDTO) (*Rese
 	if err != nil {
 		return nil, err
 	}
-	reserve := NewReserve(&dto)
+	reserve := NewReserve(dto)
 	err = s.reserveRepository.Create(ctx, reserve)
 	if err != nil {
 		return nil, err
 	}
 	return reserve, err
+}
+
+func (s *Service) Delete(ctx context.Context, dto *CreateReserveDTO) (*Reserve, error) {
+	reserve := NewReserve(dto)
+	err := s.reserveRepository.Delete(ctx, reserve)
+	if err != nil {
+		return nil, err
+	}
+	return reserve, nil
 }

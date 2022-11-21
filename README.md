@@ -30,3 +30,15 @@ Content-Type: application/json
     "cost": 1500
 }
 ```
+#### Метод признания выручки – списывает из резерва деньги, добавляет данные в отчет для бухгалтерии. Принимает id пользователя, ИД услуги, ИД заказа, сумму.
+```html
+POST http://localhost:1234/api/v1/reserve/profit
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "service_id": 3,
+  "order_id": 2,
+  "amount": 1500
+}
+```

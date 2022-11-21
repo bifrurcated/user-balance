@@ -12,6 +12,7 @@ import (
 const (
 	apiVersionURL = "/api/v1"
 	reserveURL    = "/reserve"
+	profitURL     = "/profit"
 )
 
 type handler struct {
@@ -25,6 +26,7 @@ func NewHandler(service *Service, logger *logging.Logger) handlers.Handler {
 
 func (h *handler) Register(router *httprouter.Router) {
 	router.HandlerFunc(http.MethodPost, apiVersionURL+reserveURL, apperror.Middleware(h.ReserveMoney))
+	router.HandlerFunc(http.MethodPost, apiVersionURL+reserveURL+profitURL, apperror.Middleware(h.ReserveProfit))
 }
 
 func (h *handler) ReserveMoney(w http.ResponseWriter, r *http.Request) error {
@@ -33,7 +35,7 @@ func (h *handler) ReserveMoney(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return apperror.NewAppError(nil, err.Error(), "", "US-000004")
 	}
-	reserve, err := h.service.ReserveMoney(r.Context(), reserveDTO)
+	reserve, err := h.service.ReserveMoney(r.Context(), &reserveDTO)
 	if err != nil {
 		return err
 	}
@@ -50,6 +52,31 @@ func (h *handler) ReserveMoney(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h *handler) ReserveProfit(w http.ResponseWriter, r *http.Request) error {
+	var profit ProfitReserveDTO
+	err := json.NewDecoder(r.Body).Decode(&profit)
+	if err != nil {
+		return apperror.NewAppError(nil, err.Error(), "", "US-000004")
+	}
+	reserve, err := h.service.Delete(r.Context(), &CreateReserveDTO{
+		UserID:    profit.UserID,
+		ServiceID: profit.ServiceID,
+		OrderID:   profit.OrderID,
+	})
+	if err != nil {
+		return err
+	}
+	profit.ID = reserve.ID
+	profit.Cost = reserve.Cost
+	bytes, err := json.Marshal(profit)
+	if err != nil {
+		return err
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(bytes)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
