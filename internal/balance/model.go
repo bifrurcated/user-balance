@@ -1,7 +1,7 @@
 package balance
 
 type Balance struct {
-	ID     int64   `json:"id"`
-	UserID int64   `json:"user_id"`
+	ID     uint64  `json:"id"`
+	UserID uint64  `json:"user_id"`
 	Amount float32 `json:"amount"`
 }

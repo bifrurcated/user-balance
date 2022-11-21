@@ -14,7 +14,7 @@ func NewService(repository Repository, logger *logging.Logger) *Service {
 	return &Service{repository: repository, logger: logger}
 }
 
-func (s *Service) GetOne(ctx context.Context, id int64) (user Balance, err error) {
+func (s *Service) GetOne(ctx context.Context, id uint64) (user Balance, err error) {
 	user, err = s.repository.FindOne(ctx, id)
 	if err != nil {
 		return user, err

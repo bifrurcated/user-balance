@@ -45,7 +45,7 @@ func (r *repository) Create(ctx context.Context, balance *balance.Balance) error
 	return nil
 }
 
-func (r *repository) FindOne(ctx context.Context, id int64) (u balance.Balance, err error) {
+func (r *repository) FindOne(ctx context.Context, id uint64) (u balance.Balance, err error) {
 	q := `
 		SELECT id, user_id, amount FROM balance WHERE user_id=$1
 	`
@@ -88,6 +88,36 @@ func (r *repository) AddAmount(ctx context.Context, tum balance.TransferUserMone
 			return err
 		}
 	}
+	tx.Commit(ctx)
+	return nil
+}
+
+func (r *repository) SubtractAmount(ctx context.Context, tum balance.TransferUserMoney) error {
+	tx, err := r.client.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	one, err := r.FindOne(ctx, tum.UserID)
+	if err != nil {
+		return err
+	}
+	if (one.Amount - tum.Amount) < 0 {
+		return apperror.NewAppError(nil,
+			fmt.Sprintf("not enough money (%f) on the user (%d) balance, required amount: %f", one.Amount, tum.UserID, tum.Amount),
+			"", "US-000005")
+	}
+	q := `
+		UPDATE balance
+		SET amount = amount - $2
+		WHERE user_id = $1
+	`
+	res, err := r.client.Exec(ctx, q, tum.UserID, tum.Amount)
+	if err != nil {
+		return err
+	}
+	r.logger.Debug(res)
 	tx.Commit(ctx)
 	return nil
 }
