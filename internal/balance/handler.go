@@ -2,6 +2,7 @@ package balance
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/bifrurcated/user-balance/internal/apperror"
 	"github.com/bifrurcated/user-balance/internal/handlers"
 	"github.com/bifrurcated/user-balance/pkg/logging"
@@ -36,7 +37,12 @@ func (h *handler) AddMoney(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	h.logger.Debugf("tum = %v", tum)
-
+	if tum.Amount < 0 {
+		return apperror.NewAppError(
+			nil,
+			fmt.Sprintf("cannot add negative amount (%f)", tum.Amount),
+			"", "US-000004")
+	}
 	err = h.service.AddAmount(r.Context(), tum)
 	if err != nil {
 		return err
