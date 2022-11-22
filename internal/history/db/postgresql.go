@@ -53,7 +53,7 @@ func (r *repository) FindByUserID(ctx context.Context, userID uint64) ([]history
 	q := `
 		SELECT id, sender_user_id, user_id, service_id, amount, type, datetime 
 		FROM history_operations 
-		WHERE user_id = $1
+		WHERE user_id = $1 OR sender_user_id = $1
 	`
 	r.logger.Tracef("SQL Query: %s", repeatable.FormatQuery(q))
 	rows, err := r.client.Query(ctx, q, userID)
