@@ -6,6 +6,8 @@ import (
 	"github.com/bifrurcated/user-balance/internal/balance"
 	"github.com/bifrurcated/user-balance/internal/balance/db"
 	"github.com/bifrurcated/user-balance/internal/config"
+	"github.com/bifrurcated/user-balance/internal/history"
+	historydb "github.com/bifrurcated/user-balance/internal/history/db"
 	"github.com/bifrurcated/user-balance/internal/reserve"
 	"github.com/bifrurcated/user-balance/internal/reserve/db"
 	"github.com/bifrurcated/user-balance/pkg/client/postgresql"
@@ -35,13 +37,18 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	historyRepository := historydb.NewRepository(client, logger)
+	historyService := history.NewService(historyRepository, logger)
+	historyHandler := history.NewHandler(historyService, logger)
+	historyHandler.Register(router)
+
 	balanceRepository := balancedb.NewRepository(client, logger)
-	balanceService := balance.NewService(balanceRepository, logger)
+	balanceService := balance.NewService(balanceRepository, historyRepository, logger)
 	balanceHandler := balance.NewHandler(balanceService, logger)
 	balanceHandler.Register(router)
 
 	reserveRepository := reservedb.NewRepository(client, logger)
-	reserveService := reserve.NewService(reserveRepository, balanceRepository, logger)
+	reserveService := reserve.NewService(reserveRepository, balanceRepository, historyRepository, logger)
 	reserveHandler := reserve.NewHandler(reserveService, logger)
 	reserveHandler.Register(router)
 

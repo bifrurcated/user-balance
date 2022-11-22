@@ -1,5 +1,6 @@
 -- DROP TABLE IF EXISTS balance CASCADE;
 -- DROP TABLE IF EXISTS reserve CASCADE;
+-- DROP TABLE IF EXISTS history_operations CASCADE;
 
 CREATE TABLE IF NOT EXISTS balance
 (
@@ -15,25 +16,21 @@ CREATE TABLE IF NOT EXISTS reserve
     order_id   BIGINT         NOT NULL,
     cost       DECIMAL(13, 4) NOT NULL
 );
-
+CREATE TABLE IF NOT EXISTS history_operations
+(
+    id             BIGSERIAL PRIMARY KEY,
+    sender_user_id BIGINT                                       NULL,
+    user_id        BIGINT                                       NOT NULL,
+    service_id     BIGINT                                       NULL,
+    amount         DECIMAL(13, 4)                               NOT NULL,
+    type           VARCHAR(32)                                  NOT NULL,
+    datetime       TIMESTAMP DEFAULT (now() AT TIME ZONE 'utc') NOT NULL
+);
 -- CREATE TABLE usr
 -- (
 --     id     BIGSERIAL PRIMARY KEY,
 --     name   VARCHAR(64)              NOT NULL,
 --     amount DECIMAL(13, 4) DEFAULT 0 NOT NULL
--- );
--- CREATE TABLE history_operations
--- (
---     id               BIGSERIAL PRIMARY KEY,
---     sender_user_id   BIGINT                                       NOT NULL,
---     receiver_user_id BIGINT                                       NOT NULL,
---     amount           DECIMAL(13, 4)                               NOT NULL,
---     type             VARCHAR(32)                                  NOT NULL,
---     datetime         TIMESTAMP DEFAULT (now() AT TIME ZONE 'utc') NOT NULL,
---
---
---     CONSTRAINT sender_user_fk FOREIGN KEY (sender_user_id) REFERENCES balance (id),
---     CONSTRAINT receiver_user_fk FOREIGN KEY (receiver_user_id) REFERENCES balance (id),
 -- );
 -- CREATE TABLE service
 -- (

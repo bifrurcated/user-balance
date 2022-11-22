@@ -3,17 +3,28 @@ package reserve
 import (
 	"context"
 	"github.com/bifrurcated/user-balance/internal/balance"
+	"github.com/bifrurcated/user-balance/internal/history"
 	"github.com/bifrurcated/user-balance/pkg/logging"
 )
 
 type Service struct {
 	reserveRepository Repository
 	balanceRepository balance.Repository
+	historyRepository history.Repository
 	logger            *logging.Logger
 }
 
-func NewService(reserveRepository Repository, balanceRepository balance.Repository, logger *logging.Logger) *Service {
-	return &Service{reserveRepository: reserveRepository, balanceRepository: balanceRepository, logger: logger}
+func NewService(
+	reserveRepository Repository,
+	balanceRepository balance.Repository,
+	historyRepository history.Repository,
+	logger *logging.Logger) *Service {
+	return &Service{
+		reserveRepository: reserveRepository,
+		balanceRepository: balanceRepository,
+		historyRepository: historyRepository,
+		logger:            logger,
+	}
 }
 
 func (s *Service) ReserveMoney(ctx context.Context, dto *CreateReserveDTO) (*Reserve, error) {
@@ -24,12 +35,21 @@ func (s *Service) ReserveMoney(ctx context.Context, dto *CreateReserveDTO) (*Res
 	if err != nil {
 		return nil, err
 	}
+	err = s.historyRepository.Create(ctx, &history.History{
+		UserID:    dto.UserID,
+		ServiceID: &dto.ServiceID,
+		Amount:    dto.Cost,
+		Type:      "Оплата товаров и услуг",
+	})
+	if err != nil {
+		return nil, err
+	}
 	reserve := NewReserve(dto)
 	err = s.reserveRepository.Create(ctx, reserve)
 	if err != nil {
 		return nil, err
 	}
-	return reserve, err
+	return reserve, nil
 }
 
 func (s *Service) Delete(ctx context.Context, dto *CreateReserveDTO) (*Reserve, error) {
@@ -54,6 +74,15 @@ func (s *Service) CancelReserve(ctx context.Context, dto *CancelReserveDTO) erro
 	err = s.balanceRepository.AddAmount(ctx, balance.CreateUserBalanceDTO{
 		UserID: reserve.UserID,
 		Amount: reserve.Cost,
+	})
+	if err != nil {
+		return err
+	}
+	err = s.historyRepository.Create(ctx, &history.History{
+		UserID:    reserve.UserID,
+		ServiceID: &reserve.ServiceID,
+		Amount:    reserve.Cost,
+		Type:      "Возврат, отмена операций",
 	})
 	if err != nil {
 		return err
