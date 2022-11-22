@@ -21,7 +21,7 @@ services:
         retries: 5
     restart: always
   app:
-    image: bifurcated/user-balance:v1
+    image: bifurcated/user-balance:latest
     container_name: application
     ports:
       - 1234:1234
