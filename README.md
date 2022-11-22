@@ -53,3 +53,12 @@ Content-Type: application/json
   "order_id": 1
 }
 ```
+#### Получения списка транзакций
+```html
+GET http://localhost:1234/api/v1/history
+Content-Type: application/json
+
+{
+  "user_id": 1
+}
+```

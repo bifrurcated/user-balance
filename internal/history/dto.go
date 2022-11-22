@@ -7,3 +7,7 @@ type CreateHistoryDTO struct {
 	Amount       float32 `json:"amount"`
 	Type         string  `json:"type"`
 }
+
+type UserHistoryDTO struct {
+	UserID uint64 `json:"user_id"`
+}
