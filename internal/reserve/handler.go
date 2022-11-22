@@ -13,6 +13,7 @@ const (
 	apiVersionURL = "/api/v1"
 	reserveURL    = "/reserve"
 	profitURL     = "/profit"
+	cancelURL     = "/cancel"
 )
 
 type handler struct {
@@ -27,6 +28,7 @@ func NewHandler(service *Service, logger *logging.Logger) handlers.Handler {
 func (h *handler) Register(router *httprouter.Router) {
 	router.HandlerFunc(http.MethodPost, apiVersionURL+reserveURL, apperror.Middleware(h.ReserveMoney))
 	router.HandlerFunc(http.MethodPost, apiVersionURL+reserveURL+profitURL, apperror.Middleware(h.ReserveProfit))
+	router.HandlerFunc(http.MethodPost, apiVersionURL+reserveURL+cancelURL, apperror.Middleware(h.CancelReserve))
 }
 
 func (h *handler) ReserveMoney(w http.ResponseWriter, r *http.Request) error {
@@ -78,5 +80,19 @@ func (h *handler) ReserveProfit(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
+	return nil
+}
+
+func (h *handler) CancelReserve(w http.ResponseWriter, r *http.Request) error {
+	var reserveDTO CancelReserveDTO
+	err := json.NewDecoder(r.Body).Decode(&reserveDTO)
+	if err != nil {
+		return apperror.NewAppError(nil, err.Error(), "", "US-000004")
+	}
+	err = h.service.CancelReserve(r.Context(), &reserveDTO)
+	if err != nil {
+		return err
+	}
+	w.WriteHeader(http.StatusNoContent)
 	return nil
 }

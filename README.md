@@ -42,3 +42,14 @@ Content-Type: application/json
   "amount": 1500
 }
 ```
+#### Реализовать сценарий разрезервирования денег, если услугу применить не удалось.
+```html
+POST http://localhost:1234/api/v1/reserve/cancel
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "service_id": 1,
+  "order_id": 1
+}
+```

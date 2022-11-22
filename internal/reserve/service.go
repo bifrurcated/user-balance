@@ -40,3 +40,23 @@ func (s *Service) Delete(ctx context.Context, dto *CreateReserveDTO) (*Reserve, 
 	}
 	return reserve, nil
 }
+
+func (s *Service) CancelReserve(ctx context.Context, dto *CancelReserveDTO) error {
+	reserve := NewReserve(&CreateReserveDTO{
+		UserID:    dto.UserID,
+		ServiceID: dto.ServiceID,
+		OrderID:   dto.OrderID,
+	})
+	err := s.reserveRepository.Delete(ctx, reserve)
+	if err != nil {
+		return err
+	}
+	err = s.balanceRepository.AddAmount(ctx, balance.CreateUserBalanceDTO{
+		UserID: reserve.UserID,
+		Amount: reserve.Cost,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
