@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bifrurcated/user-balance/internal/balance"
-	"github.com/bifrurcated/user-balance/internal/balance/balancedb"
+	"github.com/bifrurcated/user-balance/internal/balance/db"
 	"github.com/bifrurcated/user-balance/internal/config"
 	"github.com/bifrurcated/user-balance/internal/reserve"
 	"github.com/bifrurcated/user-balance/internal/reserve/db"
