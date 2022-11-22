@@ -14,6 +14,7 @@ const (
 	apiVersionURL = "/api/v1"
 	balanceURL    = "/balance"
 	addMoneyURL   = "/add-money"
+	transferURL   = "/transfer"
 )
 
 type handler struct {
@@ -28,6 +29,7 @@ func NewHandler(service *Service, logger *logging.Logger) handlers.Handler {
 func (h *handler) Register(router *httprouter.Router) {
 	router.HandlerFunc(http.MethodGet, apiVersionURL+balanceURL, apperror.Middleware(h.GetBalance))
 	router.HandlerFunc(http.MethodPost, apiVersionURL+addMoneyURL, apperror.Middleware(h.AddMoney))
+	router.HandlerFunc(http.MethodPost, apiVersionURL+transferURL, apperror.Middleware(h.TransferUserMoney))
 }
 
 func (h *handler) AddMoney(w http.ResponseWriter, r *http.Request) error {
@@ -70,5 +72,19 @@ func (h *handler) GetBalance(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (h *handler) TransferUserMoney(w http.ResponseWriter, r *http.Request) error {
+	var tum TransferUserMoneyDTO
+	err := json.NewDecoder(r.Body).Decode(&tum)
+	if err != nil {
+		return err
+	}
+	err = h.service.TransferUserMoney(r.Context(), tum)
+	if err != nil {
+		return err
+	}
+	w.WriteHeader(http.StatusNoContent)
 	return nil
 }
