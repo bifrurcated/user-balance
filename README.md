@@ -62,3 +62,14 @@ Content-Type: application/json
   "user_id": 1
 }
 ```
+#### Перевод между пользователями
+```html
+POST http://localhost:1234/api/v1/transfer
+Content-Type: application/json
+
+{
+  "sender_user_id": 2,
+  "receiver_user_id": 1,
+  "amount": 901
+}
+```
