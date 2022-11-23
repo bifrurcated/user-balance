@@ -10,6 +10,7 @@ import (
 	"github.com/bifrurcated/user-balance/pkg/client/postgresql"
 	"github.com/bifrurcated/user-balance/pkg/logging"
 	repeatable "github.com/bifrurcated/user-balance/pkg/utils"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -64,7 +65,7 @@ func (r *repository) FindByUserID(ctx context.Context, userID uint64, options hi
 			sign = "<"
 		}
 		if options.Value != nil {
-			q = fmt.Sprintf("%s AND %s %s %v", q, options.Field, sign, options.Value)
+			q = fmt.Sprintf("%s AND %s %s $3", q, options.Field, sign)
 		}
 		q = fmt.Sprintf("%s ORDER BY %s %s", q, options.Field, options.Order)
 	}
@@ -72,7 +73,13 @@ func (r *repository) FindByUserID(ctx context.Context, userID uint64, options hi
 		LIMIT $2 
 	`
 	r.logger.Tracef("SQL Query: %s", repeatable.FormatQuery(q))
-	rows, err := r.client.Query(ctx, q, userID, options.Limit)
+	var rows pgx.Rows
+	var err error
+	if options.Value != nil {
+		rows, err = r.client.Query(ctx, q, userID, options.Limit, options.Value)
+	} else {
+		rows, err = r.client.Query(ctx, q, userID, options.Limit)
+	}
 	if err != nil {
 		return nil, err
 	}

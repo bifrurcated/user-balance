@@ -2,8 +2,10 @@ package pagination
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 const (
@@ -26,13 +28,19 @@ func Middleware(h http.HandlerFunc, defaultLimit uint64) http.HandlerFunc {
 		}
 		var value any
 		if last != "" {
-			parsePageID, err := strconv.ParseUint(last, 10, 64)
+			amount, err := strconv.ParseUint(last, 10, 64)
 			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte("cannot parse page_id to uint64"))
-				return
+				parseTime, err2 := time.Parse(time.RFC3339, last)
+				if err2 != nil {
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write([]byte(err.Error() + " AND " + err2.Error()))
+					return
+				}
+				value = parseTime
+			} else {
+				value = amount
 			}
-			value = parsePageID
+			fmt.Println(value)
 		}
 		options := Options{
 			Limit: limit,
