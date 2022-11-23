@@ -35,9 +35,7 @@ func Middleware(h http.HandlerFunc, defaultSortField, defaultSortOrder string) h
 			Order: sortOrder,
 		}
 		ctx := context.WithValue(r.Context(), OptionsContextKey, options)
-		r = r.WithContext(ctx)
-
-		h(w, r)
+		h.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
 

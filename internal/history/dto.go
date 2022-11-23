@@ -11,3 +11,10 @@ type CreateHistoryDTO struct {
 type UserHistoryDTO struct {
 	UserID uint64 `json:"user_id"`
 }
+
+type OptionsDTO struct {
+	Limit uint64
+	Value any
+	Field string
+	Order string
+}

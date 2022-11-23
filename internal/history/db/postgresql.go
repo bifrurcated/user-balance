@@ -50,17 +50,29 @@ func (r *repository) Create(ctx context.Context, history *history.History) error
 	return nil
 }
 
-func (r *repository) FindByUserID(ctx context.Context, userID uint64, options sort.Options) ([]history.History, error) {
+func (r *repository) FindByUserID(ctx context.Context, userID uint64, options history.OptionsDTO) ([]history.History, error) {
 	q := `
 		SELECT id, sender_user_id, user_id, service_id, amount, type, datetime 
 		FROM history_operations 
-		WHERE user_id = $1 OR sender_user_id = $1
+		WHERE (user_id = $1 OR sender_user_id = $1)
 	`
 	if options.Field != "" && options.Order != "" {
+		//подставлять параметры сортировки в поле проверки
+		//в зависимости от Order ставить больше или меньше
+		sign := ">"
+		if options.Order == sort.DESC {
+			sign = "<"
+		}
+		if options.Value != nil {
+			q = fmt.Sprintf("%s AND %s %s %v", q, options.Field, sign, options.Value)
+		}
 		q = fmt.Sprintf("%s ORDER BY %s %s", q, options.Field, options.Order)
 	}
+	q = q + `
+		LIMIT $2 
+	`
 	r.logger.Tracef("SQL Query: %s", repeatable.FormatQuery(q))
-	rows, err := r.client.Query(ctx, q, userID)
+	rows, err := r.client.Query(ctx, q, userID, options.Limit)
 	if err != nil {
 		return nil, err
 	}

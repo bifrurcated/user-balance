@@ -53,9 +53,9 @@ Content-Type: application/json
   "order_id": 1
 }
 ```
-#### Получения списка транзакций с сортировкой по сумме (amount) и дате (datetime)
+#### Получения списка транзакций с пагинацией (укащывается значение последнего поля которое имеет тип по указаномму в сортировке значению, по умолчанию дата) и сортировкой по сумме (amount) и дате (datetime)
 ```html
-GET http://localhost:1234/api/v1/history?sort_by=datetime&sort_order=desc
+GET http://localhost:1234/api/v1/history?sort_by=datetime&sort_order=desc&limit=3&last=199
 Content-Type: application/json
 
 {
