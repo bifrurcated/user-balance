@@ -53,9 +53,9 @@ Content-Type: application/json
   "order_id": 1
 }
 ```
-#### Получения списка транзакций
+#### Получения списка транзакций с сортировкой по сумме (amount) и дате (datetime)
 ```html
-GET http://localhost:1234/api/v1/history
+GET http://localhost:1234/api/v1/history?sort_by=datetime&sort_order=desc
 Content-Type: application/json
 
 {

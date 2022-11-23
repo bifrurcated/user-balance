@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/bifrurcated/user-balance/internal/apperror"
 	"github.com/bifrurcated/user-balance/internal/history"
+	"github.com/bifrurcated/user-balance/pkg/api/sort"
 	"github.com/bifrurcated/user-balance/pkg/client/postgresql"
 	"github.com/bifrurcated/user-balance/pkg/logging"
 	repeatable "github.com/bifrurcated/user-balance/pkg/utils"
@@ -49,12 +50,15 @@ func (r *repository) Create(ctx context.Context, history *history.History) error
 	return nil
 }
 
-func (r *repository) FindByUserID(ctx context.Context, userID uint64) ([]history.History, error) {
+func (r *repository) FindByUserID(ctx context.Context, userID uint64, options sort.Options) ([]history.History, error) {
 	q := `
 		SELECT id, sender_user_id, user_id, service_id, amount, type, datetime 
 		FROM history_operations 
 		WHERE user_id = $1 OR sender_user_id = $1
 	`
+	if options.Field != "" && options.Order != "" {
+		q = fmt.Sprintf("%s ORDER BY %s %s", q, options.Field, options.Order)
+	}
 	r.logger.Tracef("SQL Query: %s", repeatable.FormatQuery(q))
 	rows, err := r.client.Query(ctx, q, userID)
 	if err != nil {
