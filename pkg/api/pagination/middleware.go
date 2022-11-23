@@ -21,7 +21,7 @@ func Middleware(h http.HandlerFunc, defaultLimit uint64) http.HandlerFunc {
 			parseLimit, err := strconv.ParseUint(limitStr, 10, 64)
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte("cannot parse limit to uint64"))
+				w.Write([]byte(err.Error()))
 				return
 			}
 			limit = parseLimit
