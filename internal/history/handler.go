@@ -49,6 +49,7 @@ GetUserTransactions
 	}
 */
 func (h *handler) GetUserTransactions(w http.ResponseWriter, r *http.Request) error {
+	h.logger.Info("start get user transaction")
 	var paginationOptions pagination.Options
 	if options, ok := r.Context().Value(pagination.OptionsContextKey).(pagination.Options); ok {
 		paginationOptions = options
@@ -63,8 +64,9 @@ func (h *handler) GetUserTransactions(w http.ResponseWriter, r *http.Request) er
 		return apperror.NewAppError(nil, err.Error(), "", "US-000004")
 	}
 	histories, err := h.service.UserTransactions(r.Context(), userHistory.UserID, OptionsDTO{
-		Limit: paginationOptions.Limit,
+		Limit: paginationOptions.Limit + 1,
 		Value: paginationOptions.Value,
+		ID:    paginationOptions.ID,
 		Field: sortOptions.Field,
 		Order: sortOptions.Order,
 	})
@@ -72,37 +74,45 @@ func (h *handler) GetUserTransactions(w http.ResponseWriter, r *http.Request) er
 		return err
 	}
 	var token pagination.Token
-	lengthArr := len(histories)
-	fmt.Printf("lengthArr = %v\n", lengthArr)
-	typeOrder := strings.ToLower(sortOptions.Field)
-	if typeOrder == "amount" {
-		token.Value = strconv.FormatFloat(float64(histories[lengthArr-1].Amount), 'f', -1, 32)
-		token.Type = "amount"
-	} else if typeOrder == "datetime" {
-		token.Value = strconv.FormatInt(histories[lengthArr-1].Datetime.Unix(), 10)
-		token.Type = "datetime"
-	} else {
-		var historyMap map[string]History
-		historyBytes, marshalErr := json.Marshal(histories[lengthArr-1])
-		if marshalErr != nil {
-			return marshalErr
-		}
-		unmarshalErr := json.Unmarshal(historyBytes, &historyMap)
-		if unmarshalErr != nil {
-			return unmarshalErr
-		}
+	var historiesDTO UserHistoriesDTO
+	lengthArr := uint64(len(histories))
+	h.logger.Debugf("pagination limit: %d", paginationOptions.Limit)
+	h.logger.Debugf("histories length: %d", lengthArr)
+	if lengthArr == paginationOptions.Limit+1 {
+		typeOrder := strings.ToLower(sortOptions.Field)
+		token.ID = histories[lengthArr-1].ID
+		if typeOrder == "amount" {
+			token.Value = strconv.FormatFloat(float64(histories[lengthArr-1].Amount), 'f', -1, 32)
+			token.Type = "amount"
+		} else if typeOrder == "datetime" {
+			token.Value = strconv.FormatInt(histories[lengthArr-1].Datetime.Unix(), 10)
+			token.Type = "datetime"
+		} else {
+			var historyMap map[string]History
+			historyBytes, marshalErr := json.Marshal(histories[lengthArr-1])
+			if marshalErr != nil {
+				return marshalErr
+			}
+			unmarshalErr := json.Unmarshal(historyBytes, &historyMap)
+			if unmarshalErr != nil {
+				return unmarshalErr
+			}
 
-		token.Value = fmt.Sprint(historyMap[typeOrder])
-		token.Type = typeOrder
-	}
-	h.logger.Trace(token)
-	tokenBytes, err := json.Marshal(token)
-	if err != nil {
-		return err
-	}
-	historiesDTO := UserHistoriesDTO{
-		Histories: histories,
-		NextPage:  hex.EncodeToString(tokenBytes),
+			token.Value = fmt.Sprint(historyMap[typeOrder])
+			token.Type = typeOrder
+		}
+		h.logger.Trace(token)
+		tokenBytes, errMarshal := json.Marshal(token)
+		if errMarshal != nil {
+			return errMarshal
+		}
+		encodeToString := hex.EncodeToString(tokenBytes)
+		historiesDTO = UserHistoriesDTO{
+			Histories: histories[:lengthArr-1],
+			NextPage:  &encodeToString,
+		}
+	} else {
+		historiesDTO.Histories = histories
 	}
 	bytes, err := json.Marshal(historiesDTO)
 	if err != nil {
@@ -113,5 +123,6 @@ func (h *handler) GetUserTransactions(w http.ResponseWriter, r *http.Request) er
 	if err != nil {
 		return err
 	}
+	h.logger.Info("end get user transaction")
 	return nil
 }

@@ -15,11 +15,12 @@ type UserHistoryDTO struct {
 type OptionsDTO struct {
 	Limit uint64
 	Value any
+	ID    uint64
 	Field string
 	Order string
 }
 
 type UserHistoriesDTO struct {
 	Histories []History `json:"histories"`
-	NextPage  string    `json:"next_page"`
+	NextPage  *string   `json:"next_page"`
 }

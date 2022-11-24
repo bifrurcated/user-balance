@@ -12,6 +12,7 @@ import (
 	repeatable "github.com/bifrurcated/user-balance/pkg/utils"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"strings"
 )
 
 type repository struct {
@@ -62,7 +63,7 @@ func (r *repository) FindByUserID(ctx context.Context, userID uint64, options hi
 	var rows pgx.Rows
 	var err error
 	if options.Value != nil {
-		rows, err = r.client.Query(ctx, q, userID, options.Limit, options.Value)
+		rows, err = r.client.Query(ctx, q, userID, options.Limit, options.Value, options.ID)
 	} else {
 		rows, err = r.client.Query(ctx, q, userID, options.Limit)
 	}
@@ -93,14 +94,14 @@ func (r *repository) FindByUserID(ctx context.Context, userID uint64, options hi
 
 func orderBy(options history.OptionsDTO, q string) string {
 	if options.Field != "" && options.Order != "" {
-		sign := ">"
-		if options.Order == sort.DESC {
-			sign = "<"
-		}
 		if options.Value != nil {
-			q = fmt.Sprintf("%s AND %s %s $3", q, options.Field, sign)
+			sign := ">="
+			if strings.ToUpper(options.Order) == sort.DESC {
+				sign = "<="
+			}
+			q = fmt.Sprintf("%s AND (%s,id) %s ($3,$4)", q, options.Field, sign)
 		}
-		q = fmt.Sprintf("%s ORDER BY %s %s", q, options.Field, options.Order)
+		q = fmt.Sprintf("%s ORDER BY %s %s, id %s", q, options.Field, options.Order, options.Order)
 	}
 	return q
 }
