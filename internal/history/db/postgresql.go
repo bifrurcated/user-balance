@@ -57,21 +57,7 @@ func (r *repository) FindByUserID(ctx context.Context, userID uint64, options hi
 		FROM history_operations 
 		WHERE (user_id = $1 OR sender_user_id = $1)
 	`
-	if options.Field != "" && options.Order != "" {
-		//подставлять параметры сортировки в поле проверки
-		//в зависимости от Order ставить больше или меньше
-		sign := ">"
-		if options.Order == sort.DESC {
-			sign = "<"
-		}
-		if options.Value != nil {
-			q = fmt.Sprintf("%s AND %s %s $3", q, options.Field, sign)
-		}
-		q = fmt.Sprintf("%s ORDER BY %s %s", q, options.Field, options.Order)
-	}
-	q = q + `
-		LIMIT $2 
-	`
+	q = orderBy(options, q) + ` LIMIT $2 `
 	r.logger.Tracef("SQL Query: %s", repeatable.FormatQuery(q))
 	var rows pgx.Rows
 	var err error
@@ -103,6 +89,20 @@ func (r *repository) FindByUserID(ctx context.Context, userID uint64, options hi
 		return nil, apperror.ErrNotFound
 	}
 	return historyArr, nil
+}
+
+func orderBy(options history.OptionsDTO, q string) string {
+	if options.Field != "" && options.Order != "" {
+		sign := ">"
+		if options.Order == sort.DESC {
+			sign = "<"
+		}
+		if options.Value != nil {
+			q = fmt.Sprintf("%s AND %s %s $3", q, options.Field, sign)
+		}
+		q = fmt.Sprintf("%s ORDER BY %s %s", q, options.Field, options.Order)
+	}
+	return q
 }
 
 func NewRepository(client postgresql.Client, logger *logging.Logger) history.Repository {
