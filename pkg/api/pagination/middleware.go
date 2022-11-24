@@ -2,7 +2,9 @@ package pagination
 
 import (
 	"context"
-	"fmt"
+	"encoding/hex"
+	"encoding/json"
+	"github.com/bifrurcated/user-balance/pkg/logging"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,10 +14,20 @@ const (
 	OptionsContextKey = "pagination_option"
 )
 
+type Options struct {
+	Limit uint64
+	Value any
+}
+
+type Token struct {
+	Value string `json:"value"`
+	Type  string `json:"type"`
+}
+
 func Middleware(h http.HandlerFunc, defaultLimit uint64) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		limitStr := r.URL.Query().Get("limit")
-		last := r.URL.Query().Get("last")
+		token := r.URL.Query().Get("token")
 		limit := defaultLimit
 		if limitStr != "" {
 			parseLimit, err := strconv.ParseUint(limitStr, 10, 64)
@@ -27,20 +39,39 @@ func Middleware(h http.HandlerFunc, defaultLimit uint64) http.HandlerFunc {
 			limit = parseLimit
 		}
 		var value any
-		if last != "" {
-			amount, err := strconv.ParseUint(last, 10, 64)
+		if token != "" {
+			decodeString, err := hex.DecodeString(token)
 			if err != nil {
-				parseTime, err2 := time.Parse(time.RFC3339, last)
-				if err2 != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte(err.Error()))
+				return
+			}
+			t := Token{}
+			err = json.Unmarshal(decodeString, &t)
+			logging.GetLogger().Trace(t)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte(err.Error()))
+				return
+			}
+			if t.Type == "amount" {
+				value, err = strconv.ParseFloat(t.Value, 32)
+				if err != nil {
 					w.WriteHeader(http.StatusBadRequest)
-					w.Write([]byte(err.Error() + " AND " + err2.Error()))
+					w.Write([]byte(err.Error()))
 					return
 				}
-				value = parseTime
+			} else if t.Type == "datetime" {
+				parseInt, parseErr := strconv.ParseInt(t.Value, 10, 64)
+				if parseErr != nil {
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write([]byte(parseErr.Error()))
+					return
+				}
+				value = time.Unix(parseInt, 0)
 			} else {
-				value = amount
+				value = t.Value
 			}
-			fmt.Println(value)
 		}
 		options := Options{
 			Limit: limit,
@@ -49,9 +80,4 @@ func Middleware(h http.HandlerFunc, defaultLimit uint64) http.HandlerFunc {
 		ctx := context.WithValue(r.Context(), OptionsContextKey, options)
 		h.ServeHTTP(w, r.WithContext(ctx))
 	}
-}
-
-type Options struct {
-	Limit uint64
-	Value any
 }

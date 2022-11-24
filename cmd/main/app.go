@@ -7,7 +7,7 @@ import (
 	"github.com/bifrurcated/user-balance/internal/balance/db"
 	"github.com/bifrurcated/user-balance/internal/config"
 	"github.com/bifrurcated/user-balance/internal/history"
-	historydb "github.com/bifrurcated/user-balance/internal/history/db"
+	"github.com/bifrurcated/user-balance/internal/history/db"
 	"github.com/bifrurcated/user-balance/internal/reserve"
 	"github.com/bifrurcated/user-balance/internal/reserve/db"
 	"github.com/bifrurcated/user-balance/pkg/client/postgresql"

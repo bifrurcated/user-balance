@@ -18,3 +18,8 @@ type OptionsDTO struct {
 	Field string
 	Order string
 }
+
+type UserHistoriesDTO struct {
+	Histories []History `json:"histories"`
+	NextPage  string    `json:"next_page"`
+}
