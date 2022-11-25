@@ -89,3 +89,12 @@ func (s *Service) CancelReserve(ctx context.Context, dto *CancelReserveDTO) erro
 	}
 	return nil
 }
+
+func (s *Service) SetProfit(ctx context.Context, dto *CreateReserveDTO) (*Reserve, error) {
+	reserve := NewReserve(dto)
+	err := s.reserveRepository.UpdateProfit(ctx, reserve)
+	if err != nil {
+		return nil, err
+	}
+	return reserve, nil
+}

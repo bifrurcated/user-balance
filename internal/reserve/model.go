@@ -6,6 +6,7 @@ type Reserve struct {
 	ServiceID uint64  `json:"service_id"`
 	OrderID   uint64  `json:"order_id"`
 	Cost      float32 `json:"cost"`
+	IsProfit  bool    `json:"is_profit"`
 }
 
 func NewReserve(dto *CreateReserveDTO) *Reserve {
@@ -14,5 +15,6 @@ func NewReserve(dto *CreateReserveDTO) *Reserve {
 		ServiceID: dto.ServiceID,
 		OrderID:   dto.OrderID,
 		Cost:      dto.Cost,
+		IsProfit:  dto.IsProfit,
 	}
 }

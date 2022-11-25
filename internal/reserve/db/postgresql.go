@@ -43,11 +43,6 @@ func (r *repository) Create(ctx context.Context, reserve *reserve.Reserve) error
 	return nil
 }
 
-func (r *repository) FindOne(ctx context.Context, id uint64) (reserve.Reserve, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (r *repository) Delete(ctx context.Context, reserve *reserve.Reserve) error {
 	q := `
 		DELETE FROM reserve
@@ -62,6 +57,23 @@ func (r *repository) Delete(ctx context.Context, reserve *reserve.Reserve) error
 		return err
 	}
 
+	return nil
+}
+
+func (r *repository) UpdateProfit(ctx context.Context, reserve *reserve.Reserve) error {
+	q := `
+		UPDATE reserve
+		SET is_profit = $4
+		WHERE user_id=$1 AND service_id=$2 AND order_id=$3
+		RETURNING id, cost
+	`
+	err := r.client.QueryRow(ctx, q, reserve.UserID, reserve.ServiceID, reserve.OrderID, reserve.IsProfit).Scan(&reserve.ID, &reserve.Cost)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return apperror.ErrNotFound
+		}
+		return err
+	}
 	return nil
 }
 

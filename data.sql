@@ -11,10 +11,11 @@ CREATE TABLE IF NOT EXISTS balance
 CREATE TABLE IF NOT EXISTS reserve
 (
     id         BIGSERIAL PRIMARY KEY,
-    user_id    BIGINT         NOT NULL,
-    service_id BIGINT         NOT NULL,
-    order_id   BIGINT         NOT NULL,
-    cost       DECIMAL(13, 4) NOT NULL
+    user_id    BIGINT                NOT NULL,
+    service_id BIGINT                NOT NULL,
+    order_id   BIGINT                NOT NULL,
+    cost       DECIMAL(13, 4)        NOT NULL,
+    is_profit  BOOLEAN DEFAULT false NOT NULL
 );
 CREATE TABLE IF NOT EXISTS history_operations
 (

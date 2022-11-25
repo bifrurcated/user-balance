@@ -41,7 +41,13 @@ func (h *handler) ReserveMoney(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	bytes, err := json.Marshal(reserve)
+	reserveMoneyDTO := CreateReserveMoneyDTO{
+		UserID:    reserve.UserID,
+		ServiceID: reserve.ServiceID,
+		OrderID:   reserve.OrderID,
+		Cost:      reserve.Cost,
+	}
+	bytes, err := json.Marshal(reserveMoneyDTO)
 	if err != nil {
 		return err
 	}
@@ -59,10 +65,11 @@ func (h *handler) ReserveProfit(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return apperror.NewAppError(nil, err.Error(), "", "US-000004")
 	}
-	reserve, err := h.service.Delete(r.Context(), &CreateReserveDTO{
+	reserve, err := h.service.SetProfit(r.Context(), &CreateReserveDTO{
 		UserID:    profit.UserID,
 		ServiceID: profit.ServiceID,
 		OrderID:   profit.OrderID,
+		IsProfit:  true,
 	})
 	if err != nil {
 		return err

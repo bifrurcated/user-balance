@@ -5,6 +5,7 @@ type CreateReserveDTO struct {
 	ServiceID uint64  `json:"service_id"`
 	OrderID   uint64  `json:"order_id"`
 	Cost      float32 `json:"cost"`
+	IsProfit  bool    `json:"is_profit"`
 }
 
 type ProfitReserveDTO struct {
@@ -20,4 +21,11 @@ type CancelReserveDTO struct {
 	UserID    uint64 `json:"user_id"`
 	ServiceID uint64 `json:"service_id"`
 	OrderID   uint64 `json:"order_id"`
+}
+
+type CreateReserveMoneyDTO struct {
+	UserID    uint64  `json:"user_id"`
+	ServiceID uint64  `json:"service_id"`
+	OrderID   uint64  `json:"order_id"`
+	Cost      float32 `json:"cost"`
 }
