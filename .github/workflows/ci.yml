@@ -34,7 +34,7 @@ jobs:
       - name: Test
         run: go test -v ./test/...
   build-docker-image:
-
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
