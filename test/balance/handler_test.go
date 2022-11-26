@@ -24,6 +24,30 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
+func TestAddMoney(t *testing.T) {
+	server := testdata.GetTestServer()
+	convey.Convey("Test API POST add money to user", t, func() {
+		userBalanceDTO := balance2.CreateUserBalanceDTO{
+			UserID: 1,
+			Amount: 1000,
+		}
+		var buf bytes.Buffer
+		err := json.NewEncoder(&buf).Encode(userBalanceDTO)
+		if err != nil {
+			t.Fatal(err)
+		}
+		r, err := http.NewRequest(http.MethodPost, server.Test.URL+"/api/v1/add-money", &buf)
+		if err != nil {
+			t.Fatal(err)
+		}
+		response, err := http.DefaultClient.Do(r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		convey.So(response.StatusCode, convey.ShouldEqual, 204)
+	})
+}
+
 func TestGetBalance(t *testing.T) {
 	server := testdata.GetTestServer()
 	convey.Convey("Test API Get user balance", t, func() {
@@ -42,7 +66,6 @@ func TestGetBalance(t *testing.T) {
 			t.Fatal(err)
 		}
 		response, err := http.DefaultClient.Do(r)
-		defer response.Body.Close()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -57,6 +80,7 @@ func TestGetBalance(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			response.Body.Close()
 		})
 	})
 }
