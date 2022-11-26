@@ -24,7 +24,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestAddMoney(t *testing.T) {
+func TestGetBalance(t *testing.T) {
 	server := testdata.GetTestServer()
 	convey.Convey("Test API Get user balance", t, func() {
 		_, err := server.Store.Exec(context.TODO(), `INSERT INTO balance (user_id, amount) VALUES (1,100)`)
