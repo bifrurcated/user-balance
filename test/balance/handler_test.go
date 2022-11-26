@@ -45,6 +45,12 @@ func TestAddMoney(t *testing.T) {
 			t.Fatal(err)
 		}
 		convey.So(response.StatusCode, convey.ShouldEqual, 204)
+		convey.Reset(func() {
+			_, err = server.Store.Exec(context.TODO(), `DELETE FROM balance WHERE user_id=$1`, userBalanceDTO.UserID)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
 	})
 }
 
