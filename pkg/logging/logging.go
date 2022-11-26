@@ -55,12 +55,12 @@ func init() {
 		FullTimestamp: true,
 	}
 
-	err := os.Mkdir("logs", 0644)
+	err := os.Mkdir("logs", os.ModePerm)
 	if err != nil && os.IsNotExist(err) {
 		panic(err)
 	}
 
-	file, err := os.OpenFile("logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
+	file, err := os.OpenFile("logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
