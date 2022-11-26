@@ -1,7 +1,3 @@
--- DROP TABLE IF EXISTS balance CASCADE;
--- DROP TABLE IF EXISTS reserve CASCADE;
--- DROP TABLE IF EXISTS history_operations CASCADE;
-
 CREATE TABLE IF NOT EXISTS balance
 (
     id      BIGSERIAL PRIMARY KEY,
@@ -27,34 +23,3 @@ CREATE TABLE IF NOT EXISTS history_operations
     type           VARCHAR(32)                                  NOT NULL,
     datetime       TIMESTAMP DEFAULT (now() AT TIME ZONE 'utc') NOT NULL
 );
--- CREATE TABLE usr
--- (
---     id     BIGSERIAL PRIMARY KEY,
---     name   VARCHAR(64)              NOT NULL,
---     amount DECIMAL(13, 4) DEFAULT 0 NOT NULL
--- );
--- CREATE TABLE service
--- (
---     id    BIGSERIAL PRIMARY KEY,
---     name  VARCHAR(100)  NOT NULL,
---     price DECIMAL(10, 2) NOT NULL,
--- );
--- CREATE TABLE order
--- (
---     id BIGSERIAL PRIMARY KEY,
--- );
-
--- -- page 1
--- SELECT *
--- FROM history_operations
--- WHERE user_id = 4 OR sender_user_id = 4
--- ORDER BY id
--- LIMIT 2;
---
--- -- page 2
--- SELECT *
--- FROM history_operations
--- WHERE (id) > (2) AND (user_id = 4 OR sender_user_id = 4)
--- ORDER BY id
--- LIMIT 2;
-
