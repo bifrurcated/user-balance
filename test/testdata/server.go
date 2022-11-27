@@ -29,6 +29,7 @@ type Server struct {
 const (
 	Balance = "balance"
 	Reserve = "reserve"
+	History = "history"
 )
 
 var one sync.Once
@@ -59,19 +60,24 @@ func GetTestServer(packageName string) *Server {
 		}
 
 		switch packageName {
-		case "balance":
+		case Balance:
 			historyRepository := historydb.NewRepository(client, logger)
 			balanceRepository := balancedb.NewRepository(client, logger)
 			service := balance.NewService(balanceRepository, historyRepository, logger)
 			handler := balance.NewHandler(service, logger)
 			handler.Register(router)
-		case "reserve":
+		case Reserve:
 			historyRepository := historydb.NewRepository(client, logger)
 			balanceRepository := balancedb.NewRepository(client, logger)
 			reserveRepository := reservedb.NewRepository(client, logger)
 			reserveService := reserve.NewService(reserveRepository, balanceRepository, historyRepository, logger)
 			reserveHandler := reserve.NewHandler(reserveService, logger)
 			reserveHandler.Register(router)
+		case History:
+			historyRepository := historydb.NewRepository(client, logger)
+			historyService := history.NewService(historyRepository, logger)
+			historyHandler := history.NewHandler(historyService, logger)
+			historyHandler.Register(router)
 		default:
 			historyRepository := historydb.NewRepository(client, logger)
 			historyService := history.NewService(historyRepository, logger)
