@@ -90,3 +90,38 @@ func TestGetBalance(t *testing.T) {
 		})
 	})
 }
+
+func TestTransferUserMoney(t *testing.T) {
+	server := testdata.GetTestServer()
+	convey.Convey("Test API POST transfer user money", t, func() {
+		_, err := server.Store.Exec(context.TODO(), `INSERT INTO balance (user_id, amount) VALUES (1,1000)`)
+		if err != nil {
+			t.Fatal(err)
+		}
+		userMoneyDTO := balance2.TransferUserMoneyDTO{
+			SenderUserID:   1,
+			ReceiverUserID: 2,
+			Amount:         500,
+		}
+		var buf bytes.Buffer
+		err = json.NewEncoder(&buf).Encode(userMoneyDTO)
+		if err != nil {
+			t.Fatal(err)
+		}
+		r, err := http.NewRequest(http.MethodPost, server.Test.URL+"/api/v1/transfer", &buf)
+		if err != nil {
+			t.Fatal(err)
+		}
+		response, err := http.DefaultClient.Do(r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		convey.So(response.StatusCode, convey.ShouldEqual, 204)
+		convey.Reset(func() {
+			_, err = server.Store.Exec(context.TODO(), `DELETE FROM balance WHERE user_id IN ($1,$2)`, userMoneyDTO.SenderUserID, userMoneyDTO.ReceiverUserID)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	})
+}
