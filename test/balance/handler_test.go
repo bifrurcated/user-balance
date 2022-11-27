@@ -14,7 +14,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	server := testdata.GetTestServer()
+	server := testdata.GetTestServer(testdata.Balance)
 	code := m.Run()
 	err := testdata.ExecuteSQLScript(context.TODO(), server.Store, "../../test/testdata/drop.sql")
 	if err != nil {
@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestAddMoney(t *testing.T) {
-	server := testdata.GetTestServer()
+	server := testdata.GetTestServer(testdata.Balance)
 	convey.Convey("Test API POST add money to user", t, func() {
 		userBalanceDTO := balance2.CreateUserBalanceDTO{
 			UserID: 1,
@@ -55,7 +55,7 @@ func TestAddMoney(t *testing.T) {
 }
 
 func TestGetBalance(t *testing.T) {
-	server := testdata.GetTestServer()
+	server := testdata.GetTestServer(testdata.Balance)
 	convey.Convey("Test API Get user balance", t, func() {
 		_, err := server.Store.Exec(context.TODO(), `INSERT INTO balance (user_id, amount) VALUES (1,100)`)
 		if err != nil {
@@ -92,7 +92,7 @@ func TestGetBalance(t *testing.T) {
 }
 
 func TestTransferUserMoney(t *testing.T) {
-	server := testdata.GetTestServer()
+	server := testdata.GetTestServer(testdata.Balance)
 	convey.Convey("Test API POST transfer user money", t, func() {
 		_, err := server.Store.Exec(context.TODO(), `INSERT INTO balance (user_id, amount) VALUES (1,1000)`)
 		if err != nil {

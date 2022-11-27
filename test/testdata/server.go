@@ -7,7 +7,10 @@ import (
 	"github.com/bifrurcated/user-balance/internal/balance"
 	balancedb "github.com/bifrurcated/user-balance/internal/balance/db"
 	"github.com/bifrurcated/user-balance/internal/config"
+	"github.com/bifrurcated/user-balance/internal/history"
 	historydb "github.com/bifrurcated/user-balance/internal/history/db"
+	"github.com/bifrurcated/user-balance/internal/reserve"
+	reservedb "github.com/bifrurcated/user-balance/internal/reserve/db"
 	"github.com/bifrurcated/user-balance/pkg/client/postgresql"
 	"github.com/bifrurcated/user-balance/pkg/logging"
 	"github.com/jackc/pgx/v5"
@@ -23,10 +26,15 @@ type Server struct {
 	Store postgresql.Client
 }
 
+const (
+	Balance = "balance"
+	Reserve = "reserve"
+)
+
 var one sync.Once
 var server *Server
 
-func GetTestServer() *Server {
+func GetTestServer(packageName string) *Server {
 	one.Do(func() {
 		logger := logging.GetLogger()
 		router := httprouter.New()
@@ -50,11 +58,34 @@ func GetTestServer() *Server {
 			logger.Fatal(err)
 		}
 
-		historyRepository := historydb.NewRepository(client, logger)
-		balanceRepository := balancedb.NewRepository(client, logger)
-		service := balance.NewService(balanceRepository, historyRepository, logger)
-		handler := balance.NewHandler(service, logger)
-		handler.Register(router)
+		switch packageName {
+		case "balance":
+			historyRepository := historydb.NewRepository(client, logger)
+			balanceRepository := balancedb.NewRepository(client, logger)
+			service := balance.NewService(balanceRepository, historyRepository, logger)
+			handler := balance.NewHandler(service, logger)
+			handler.Register(router)
+		case "reserve":
+			historyRepository := historydb.NewRepository(client, logger)
+			balanceRepository := balancedb.NewRepository(client, logger)
+			reserveRepository := reservedb.NewRepository(client, logger)
+			reserveService := reserve.NewService(reserveRepository, balanceRepository, historyRepository, logger)
+			reserveHandler := reserve.NewHandler(reserveService, logger)
+			reserveHandler.Register(router)
+		default:
+			historyRepository := historydb.NewRepository(client, logger)
+			historyService := history.NewService(historyRepository, logger)
+			historyHandler := history.NewHandler(historyService, logger)
+			historyHandler.Register(router)
+			balanceRepository := balancedb.NewRepository(client, logger)
+			balanceService := balance.NewService(balanceRepository, historyRepository, logger)
+			balanceHandler := balance.NewHandler(balanceService, logger)
+			balanceHandler.Register(router)
+			reserveRepository := reservedb.NewRepository(client, logger)
+			reserveService := reserve.NewService(reserveRepository, balanceRepository, historyRepository, logger)
+			reserveHandler := reserve.NewHandler(reserveService, logger)
+			reserveHandler.Register(router)
+		}
 
 		server = &Server{
 			Test:  httptest.NewServer(router),
