@@ -111,11 +111,11 @@ func TestReserveProfit(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		convey.So(respProfit.UserID, convey.ShouldResemble, 1)
-		convey.So(respProfit.ServiceID, convey.ShouldResemble, 1)
-		convey.So(respProfit.OrderID, convey.ShouldResemble, 1)
-		convey.So(respProfit.Cost, convey.ShouldResemble, 100)
-		convey.So(respProfit.Amount, convey.ShouldResemble, 200)
+		convey.So(respProfit.UserID, convey.ShouldEqual, 1)
+		convey.So(respProfit.ServiceID, convey.ShouldEqual, 1)
+		convey.So(respProfit.OrderID, convey.ShouldEqual, 1)
+		convey.So(respProfit.Cost, convey.ShouldEqual, 100)
+		convey.So(respProfit.Amount, convey.ShouldEqual, 200)
 
 		convey.Reset(func() {
 			_, err = server.Store.Exec(context.TODO(), `DELETE FROM reserve WHERE user_id=$1 AND service_id=$2 AND order_id=$3`,
