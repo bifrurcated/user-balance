@@ -16,7 +16,7 @@ import (
 func TestMain(m *testing.M) {
 	server := testdata.GetTestServer()
 	code := m.Run()
-	err := testdata.ExecuteSQLScript(context.TODO(), server.Store, "drop.sql")
+	err := testdata.ExecuteSQLScript(context.TODO(), server.Store, "../../test/testdata/drop.sql")
 	if err != nil {
 		panic(err)
 	}

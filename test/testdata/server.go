@@ -45,7 +45,7 @@ func GetTestServer() *Server {
 			logger.Fatal(err)
 		}
 
-		err = ExecuteSQLScript(context.TODO(), client, "create.sql")
+		err = ExecuteSQLScript(context.TODO(), client, "../../data.sql")
 		if err != nil {
 			logger.Fatal(err)
 		}
@@ -65,9 +65,9 @@ func GetTestServer() *Server {
 	return server
 }
 
-func ExecuteSQLScript(ctx context.Context, client postgresql.Client, fileName string) error {
+func ExecuteSQLScript(ctx context.Context, client postgresql.Client, pathToFile string) error {
 	logger := logging.GetLogger()
-	path := filepath.Join("../../test/testdata/" + fileName)
+	path := filepath.Join(pathToFile)
 
 	logger.Info("read sql script file")
 	c, ioErr := os.ReadFile(path)
